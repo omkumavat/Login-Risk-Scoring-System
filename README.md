@@ -26,6 +26,19 @@ A **full‑stack MERN** application that demonstrates an **adaptive identity and
 - **Dynamic dashboards** built with `recharts` and glass‑morphism UI
 - **Role‑based access control** (`protect`, `adminOnly` middleware)
 
+## Example – Admin Dashboard Screenshot
+
+![Admin dashboard overview](Project/Backend/uploads/Screenshot%20from%202026-05-24%2018-54-34.png)
+
+*The admin page shows real‑time metrics, flagged warnings, and risk distribution charts.*  
+
+## Example – Security Activity Screenshot
+
+![Admin dashboard overview](Project/Backend/uploads/Screenshot%20from%202026-05-24%2018-54-26.png)
+
+*The security audit page shows real‑time metrics, filter, and all logs of that user*  
+
+
 ## Architecture
 ```
 Project/
