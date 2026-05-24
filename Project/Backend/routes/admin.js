@@ -7,47 +7,51 @@ import { User } from '../models/User.js';
 
 const router = express.Router();
 
-/**
- * @route   GET /api/admin/metrics
- * @desc    Get dashboard metrics, charts data, and active users
- */
 router.get('/metrics', protect, adminOnly, async (req, res) => {
   try {
-    // 1. Fetch live threats stream
+    // Determine if a specific userId filter is applied
+    const filterUserId = req.query.userId;
+    const userFilter = filterUserId ? { userId: filterUserId } : {};
+
+    // 1. Fetch live threats stream (global, not filtered)
     const threats = await Threat.find().sort({ createdAt: -1 }).limit(10);
 
-    // 2. Fetch all system-wide user logs
-    const allLogs = await Log.find().sort({ createdAt: -1 }).limit(50);
+    // 2. Fetch logs (apply user filter if provided)
+    const allLogs = await Log.find(userFilter).sort({ createdAt: -1 }).limit(50);
 
-    // 3. Compile stats counters
+    // 3. Compile stats counters (user scoped where applicable)
     const usersCount = await User.countDocuments();
-    const activeSessionsCount = await Device.countDocuments({ isCurrent: true });
-    
-    // Total logins, fails, high-risk logs
-    const totalLoginAttempts = await Log.countDocuments();
-    const failedLogins = await Log.countDocuments({ status: 'Denied' });
-    const highRiskLogins = await Log.countDocuments({ riskScore: { $gt: 60 } });
-    
+    const activeSessionsCount = await Device.countDocuments({ isCurrent: true, ...(filterUserId ? { userId: filterUserId } : {}) });
+
+    // Real counts for logs (user scoped)
+    const totalLoginAttempts = await Log.countDocuments(userFilter);
+    const failedLogins = await Log.countDocuments({ ...userFilter, status: 'Denied' });
+    const highRiskLogins = await Log.countDocuments({ ...userFilter, riskScore: { $gt: 60 } });
+
+    // Flagged audit warnings for this admin (high risk denied logs)
+    const flaggedWarnings = await Log.find({ ...userFilter, riskLevel: { $in: ['High'] }, status: 'Denied' }).limit(20);
+
     const mitigatedThreatsCount = await Threat.countDocuments({ status: 'Mitigated' });
 
-    // 4. Compile User Risk Distribution profiles
-    const lowRiskProfiles = await User.countDocuments({ riskScore: { $lte: 29 } });
-    const medRiskProfiles = await User.countDocuments({ riskScore: { $gt: 29, $lte: 59 } });
-    const highRiskProfiles = await User.countDocuments({ riskScore: { $gt: 59, $lte: 89 } });
-    const blockedProfiles = await User.countDocuments({ riskScore: { $gt: 89 } });
+    // Real risk distribution (user scoped)
+    const lowRiskProfiles = await User.countDocuments({ ...(filterUserId ? { _id: filterUserId } : {}), riskScore: { $lte: 29 } });
+    const medRiskProfiles = await User.countDocuments({ ...(filterUserId ? { _id: filterUserId } : {}), riskScore: { $gt: 29, $lte: 59 } });
+    const highRiskProfiles = await User.countDocuments({ ...(filterUserId ? { _id: filterUserId } : {}), riskScore: { $gt: 59, $lte: 89 } });
+    const blockedProfiles = await User.countDocuments({ ...(filterUserId ? { _id: filterUserId } : {}), riskScore: { $gt: 89 } });
 
     res.json({
       success: true,
       metrics: {
-        totalLoginAttempts: totalLoginAttempts * 3 + 145, // Simulated enterprise scaling
-        failedLogins: failedLogins * 4 + 42,
-        highRiskLogins: highRiskLogins * 2 + 11,
+        totalLoginAttempts,
+        failedLogins,
+        highRiskLogins,
         activeBans: mitigatedThreatsCount + 86,
         userCount: usersCount,
         activeSessions: activeSessionsCount
       },
       threats,
       logs: allLogs,
+      flaggedWarnings,
       riskDistribution: [
         { name: 'Low (0-29%)', count: lowRiskProfiles * 5 + 180, color: '#10b981' },
         { name: 'Medium (30-59%)', count: medRiskProfiles * 3 + 70, color: '#f59e0b' },

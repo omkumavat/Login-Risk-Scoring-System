@@ -26,13 +26,27 @@ import {
 } from 'recharts';
 
 export const AdminPage = () => {
-  const { logs, threats, devices } = useSecurity();
+  const { adminMetrics, logs, threats, devices, user } = useSecurity();
+
+  // Use real metrics from backend
+  const {
+    totalLoginAttempts,
+    failedLogins,
+    highRiskLogins,
+    activeBans,
+    userCount,
+    activeSessions,
+    riskDistribution: adminRiskDistribution
+  } = adminMetrics;
+
+  // Metrics calculation using real data
+  const totalAttempts = totalLoginAttempts;
+  const failedAttempts = failedLogins;
+  const highRiskAttempts = highRiskLogins;
+  const activeBansCount = activeBans;
 
   // Metrics calculation
-  const totalAttempts = logs.length * 34 + 148; // Simulated enterprise scaling
-  const failedAttempts = logs.filter(log => log.status === 'Denied').length * 8 + 42;
-  const highRiskAttempts = logs.filter(log => log.riskScore > 60).length * 4 + 11;
-  const activeBans = threats.filter(t => t.status === 'Mitigated').length + 86;
+
 
   // Stats Card Layout data
   const statItems = [
@@ -43,11 +57,12 @@ export const AdminPage = () => {
   ];
 
   // Graph Data: User Risk Distribution
-  const riskDistribution = [
-    { name: 'Low (0-29%)', count: 184, color: '#10b981' },
-    { name: 'Medium (30-59%)', count: 76, color: '#f59e0b' },
-    { name: 'High (60-89%)', count: 32, color: '#f43f5e' },
-    { name: 'Blocked (90%+)', count: 14, color: '#be123c' }
+  // Use risk distribution from adminMetrics
+  const riskDistribution = adminRiskDistribution || [
+    { name: 'Low (0-29%)', count: 0, color: '#10b981' },
+    { name: 'Medium (30-59%)', count: 0, color: '#f59e0b' },
+    { name: 'High (60-89%)', count: 0, color: '#f43f5e' },
+    { name: 'Blocked (90%+)', count: 0, color: '#be123c' }
   ];
 
   // Custom tooltips

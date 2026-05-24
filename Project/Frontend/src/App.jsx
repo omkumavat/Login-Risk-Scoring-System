@@ -7,6 +7,7 @@ import { ToastContainer } from './components/ToastContainer';
 
 // Import Pages
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { OtpPage } from './pages/OtpPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ActivityPage } from './pages/ActivityPage';
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           {/* Public Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/otp" element={<OtpPage />} />
 
           {/* Protected Console Routes */}

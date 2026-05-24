@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSecurity } from '../context/SecurityContext';
 import { ShieldAlert, Eye, EyeOff, Lock, Mail, Terminal, AlertTriangle, Cpu, Network } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export const LoginPage = () => {
   const { login } = useSecurity();
@@ -252,6 +253,10 @@ export const LoginPage = () => {
               )}
             </button>
           </form>
+
+          <div className="flex items-center justify-center text-xs pt-1">
+            <p className=''>Don't registered yet? Register <Link to='/register'>here</Link></p>
+          </div>
 
           {/* Quick Simulation Help Section */}
           <div className="mt-8 pt-6 border-t border-white/5 space-y-3">
