@@ -141,8 +141,5 @@ The project uses **ESLint** with the AirBnB style guide and **Prettier** for con
 4. Submit a Pull Request with a clear description of the change.
 5. All contributions must adhere to the security model – any new endpoint must be protected by `protect` middleware and optionally `adminOnly`.
 
-## License
-Distributed under the **MIT License**. See `LICENSE` for more information.
-
 ---
 *Built with a focus on **identity awareness**, **adaptive security**, and **real‑time visibility** for security operations.*
